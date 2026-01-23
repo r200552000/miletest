@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>TDC環哩匯 x 航空卡消費累哩工具 v10.0</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Mali:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* =========================
+       CSS 樣式表 (v10.0 Final)
+       ========================= */
+    :root {
+      --bg-main: #fffdf9;
+      --bg-card: #ffffff;
+      --primary: #60a5fa;
+      --primary-dark: #2563eb;
+      --text-header: #334155;
+      --text-body: #475569;
+      --text-light: #94a3b8;
+      --shadow-draw: 3px 3px 0px rgba(0,0,0,0.06);
+      --radius-box: 24px;
+      --radius-pill: 50px;
+      --font-hand: 'Mali', cursive;
+      --font-main: 'Varela Round', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-body);
+      font-family: var(--font-main);
+      padding-bottom: 120px;
+      min-height: 100vh;
+      background-image: radial-gradient(#e0f2fe 2px, transparent 2px);
+      background-size: 24px 24px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    h1,h2,h3,h4,h5,h6 { font-family: var(--font-hand); font-weight: 700; color: var(--text-header); }
+
+    /* Header */
+    .header {
+      background: #ffffff; padding: 15px 20px 25px 20px;
+      border-bottom-left-radius: 36px; border-bottom-right-radius: 36px;
+      position: sticky; top: 0; z-index: 1000;
+      box-shadow: var(--shadow-draw); margin-bottom: -10px;
+      display: flex; justify-content: space-between; align-items: center;
+      height: 100px; border-bottom: 3px dashed #bae6fd;
+    }
+    .header-icon {
+      width: 44px; height: 44px; background: #eff6ff; border: 2px solid #bfdbfe;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: var(--primary); font-size: 1.2rem; transform: rotate(-5deg); margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .header-title h5 { 
+      margin: 0; 
+      font-size: 1.1rem; 
+      color: var(--primary-dark); 
+      line-height: 1.3;
+    }
+    .header-title small { color: var(--text-light); font-size: 0.8rem; font-family: var(--font-hand); }
+
+    .btn-header {
+      background: #fff; border: 2px solid #e2e8f0; color: var(--text-body);
+      font-weight: 700; font-family: var(--font-hand); font-size: 0.9rem;
+      padding: 8px 14px; box-shadow: 2px 2px 0 #e2e8f0; border-radius: 20px;
+      transition: 0.1s; white-space: nowrap;
+    }
+    .btn-header:active { transform: translateY(2px); box-shadow: 0 0 0; }
+
+    .container-custom { padding: 20px 16px; max-width: 600px; margin: 0 auto; position: relative; z-index: 101; }
+    
+    .card-box {
+      background: var(--bg-card);
+      border-radius: var(--radius-box);
+      padding: 20px; margin-bottom: 16px;
+      border: 2px solid #f1f5f9;
+      box-shadow: var(--shadow-draw);
+    }
+
+    .form-label {
+      font-weight: 700; color: var(--text-header);
+      margin-bottom: 6px; font-size: 0.9rem; font-family: var(--font-hand);
+    }
+    .form-control, .form-select {
+      background-color: #fff !important; border: 2px solid #cbd5e1 !important;
+      color: var(--text-header) !important;
+      padding: 10px 14px; border-radius: 16px;
+      font-size: 1rem; font-weight: 600; height: 48px;
+      box-shadow: inset 2px 2px 4px rgba(0,0,0,0.03);
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
+    }
+    
+    #amount { color: var(--primary) !important; font-size: 1.5rem; letter-spacing: 1px; font-family: var(--font-hand); }
+    
+    /* Buttons */
+    .btn-action {
+      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+      color: white; font-weight: 700; border-radius: var(--radius-pill);
+      padding: 14px; width: 100%; border: none; font-size: 1.1rem;
+      font-family: var(--font-hand);
+      box-shadow: 3px 3px 0 rgba(59, 130, 246, 0.25);
+      margin-top: 10px; border: 2px solid #bfdbfe;
+      transition: 0.1s;
+    }
+    .btn-action:active { transform: translateY(3px); box-shadow: 0 0 0; }
+
+    /* Switch Groups */
+    .switch-group {
+      background: #f8fafc; padding: 10px 14px; border-radius: 16px;
+      border: 2px solid #e2e8f0; box-shadow: 2px 2px 0 #e2e8f0;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 100%; white-space: nowrap; cursor: pointer;
+    }
+    .switch-label {
+      font-size: 0.85rem; font-weight: 700; color: var(--text-body);
+      font-family: var(--font-hand); margin-right: 4px; display: flex; align-items: center; gap: 6px;
+    }
+    .form-check-input {
+      width: 2.8em; height: 1.5em;
+      background-color: #cbd5e1; border: 2px solid #cbd5e1;
+      cursor: pointer; transition: 0.3s; flex-shrink: 0;
+    }
+    .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+
+    /* Result Cards */
+    #result-area { display: none; animation: popUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes popUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+    .result-tag {
+      background: var(--primary); color: white;
+      padding: 4px 16px; border-radius: 20px; font-size: 0.85rem;
+      font-weight: 700; display: inline-block; font-family: var(--font-hand);
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+      transform: rotate(-1deg);
+    }
+
+    .plan-card {
+      padding: 16px; border-radius: 18px; margin-top: 12px;
+      border: 2px solid #f1f5f9; position: relative; background: #fff;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.03);
+    }
+    .plan-winner { 
+      border-color: var(--primary); background: #f0f9ff; 
+      transform: rotate(-0.5deg);
+    }
+    .winner-badge {
+      position: absolute; top: -12px; right: 10px;
+      background: #fde047; color: var(--text-header);
+      font-size: 0.75rem; padding: 4px 12px; border-radius: 14px;
+      font-weight: 700; border: 2px solid #fde047;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+      transform: rotate(3deg); font-family: var(--font-hand);
+    }
+    .warning-badge {
+      background: #fee2e2; color: #ef4444; font-size: 0.75rem;
+      padding: 2px 8px; border-radius: 8px; font-weight: 700;
+      border: 1px solid #fecaca; display: inline-block; margin-top: 4px;
+    }
+    .card-name { font-size: 1.1rem; font-weight: 800; color: var(--text-header); margin: 0; }
+    .card-miles { font-size: 1.3rem; color: #34d399; font-weight: 900; font-family: var(--font-hand); }
+    .card-tpm { font-size: 0.75rem; color: #94a3b8; font-weight: 700; background: #fff; padding: 2px 8px; border-radius: 10px; display: inline-block; border: 1px solid #e2e8f0; }
+
+    /* NCCC Alert Box */
+    .nccc-alert {
+      background-color: #fffbeb;
+      border: 2px dashed #f59e0b;
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+      color: #92400e;
+      text-align: left;
+    }
+    .nccc-btn {
+      display: inline-block;
+      margin-top: 8px;
+      background: #fff;
+      border: 1px solid #f59e0b;
+      color: #d97706;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-decoration: none;
+      box-shadow: 2px 2px 0 rgba(245, 158, 11, 0.2);
+    }
+
+    /* Bottom Nav */
+    .nav-bottom {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      width: 280px; background: #ffffff; border: 3px solid #bfdbfe;
+      border-radius: 50px; display: flex; justify-content: space-evenly;
+      padding: 8px; z-index: 2000; box-shadow: 4px 4px 0 rgba(191, 219, 254, 0.5);
+    }
+    .nav-item {
+      color: var(--text-light); font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; padding: 8px 24px; transition: 0.2s;
+      display: flex; align-items: center; gap: 6px; font-family: var(--font-hand);
+      border-radius: 30px;
+    }
+    .nav-item.active { background: #eff6ff; color: var(--primary); }
+
+    /* Settings Modal */
+    .modal-content { 
+      border-radius: 24px; border: 3px solid #bfdbfe; background: #fffdf7; 
+    }
+    .modal-header { border-bottom: 2px dashed #e2e8f0; padding: 20px; }
+    .modal-title { font-weight: 800; color: var(--text-header); font-family: var(--font-hand); }
+    
+    .setting-section { 
+      background: #fff; padding: 16px; border-radius: 18px; margin-bottom: 16px; 
+      border: 2px solid #f1f5f9; box-shadow: 2px 2px 0 #f1f5f9;
+    }
+    .setting-title { 
+      font-size: 0.9rem; font-weight: 700; color: var(--text-header); 
+      margin-bottom: 12px; font-family: var(--font-hand); display: flex; align-items: center; gap:6px;
+    }
+    .setting-title::before { content:''; display:inline-block; width:4px; height:16px; background:var(--primary); border-radius:4px; }
+
+    .custom-card-item {
+      background: #f8fafc; padding: 12px; border-radius: 14px; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+      border: 2px solid #e2e8f0;
+    }
+    .delete-btn { 
+      color: #ef4444; background: #fff; width: 36px; height: 36px; border-radius: 10px; 
+      display: flex; align-items: center; justify-content: center; cursor: pointer; 
+      border: 2px solid #fecaca; box-shadow: 2px 2px 0 #fecaca;
+    }
+    
+    /* Update Info (Top) */
+    .update-info {
+        font-family: var(--font-hand);
+        color: #1e293b;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        text-align: center;
+        background: #f0f9ff;
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 50px;
+        border: 2px solid #bfdbfe;
+        box-shadow: 2px 2px 0 #bfdbfe;
+    }
+
+    /* Disclaimer (High Contrast) */
+    .disclaimer-text {
+      font-size: 0.9rem;
+      color: #000000;
+      font-weight: 700;
+      text-align: justify;
+      line-height: 1.6;
+      margin-top: 30px;
+      padding: 16px;
+      background: #fff;
+      border: 2px solid #000;
+      border-radius: 16px;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+    }
+    
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div class="d-flex align-items-center">
+      <div class="header-icon"><i class="fa-solid fa-plane-departure"></i></div>
+      <div class="header-title">
+        <h5>TDC環哩匯 x 航空卡<br>消費累哩工具 v10.0</h5>
+      </div>
+    </div>
+    <button class="btn-header" onclick="openSettings()"><i class="fa-solid fa-gear me-1"></i> 設定</button>
+  </div>
+
+  <div class="container-custom">
+    
+    <div class="text-center w-100">
+       <div class="update-info">
+         <i class="fa-solid fa-circle-info me-1 text-primary"></i> 
+         資料庫最後更新：<span class="db-date-display text-primary"></span>
+       </div>
+    </div>
+
+    <div id="page-calc" class="page-section">
+      <div class="card-box">
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <div class="switch-group" onclick="toggleSwitch('birthdayMode')" style="background:#fff1f2; border-color:#fecdd3; box-shadow: 2px 2px 0 #fecdd3;">
+              <span class="switch-label text-danger"><i class="fa-solid fa-cake-candles"></i> 生日月</span>
+              <input class="form-check-input" type="checkbox" id="birthdayMode">
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="switch-group" onclick="toggleSwitch('flyMode')" style="background:#ecfdf5; border-color:#a7f3d0; box-shadow: 2px 2px 0 #a7f3d0;">
+              <span class="switch-label text-success"><i class="fa-solid fa-ticket"></i> 越飛有哩</span>
+              <input class="form-check-input" type="checkbox" id="flyMode">
+            </div>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label text-primary"><i class="fa-solid fa-crosshairs me-1"></i> 累積目標 (航空/計畫)</label>
+          <select id="redemption-target" class="form-select border-primary" style="background-color: #eff6ff !important; border-width: 2px;">
+            <option value="AM_BR">🌏 亞萬 / 長榮 (AM / BR)</option>
+            <option value="CI">🌸 中華航空 (CI)</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">消費金額</label>
+          <div class="input-group">
+            <input type="number" id="amount" class="form-control" placeholder="0" inputmode="decimal">
+          </div>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label">幣別</label>
+            <select id="currency" class="form-select">
+              <option value="TWD">🇹🇼 TWD</option>
+              <option value="JPY">🇯🇵 JPY</option>
+              <option value="USD">🇺🇸 USD</option>
+              <option value="EUR">🇪🇺 EUR</option>
+              <option value="KRW">🇰🇷 KRW</option>
+              <option value="THB">🇹🇭 THB</option>
+              <option value="CNY">🇨🇳 CNY</option>
+              <option value="SGD">🇸🇬 SGD</option>
+              <option value="other">🌏 其他</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label">支付方式</label>
+            <select id="payment" class="form-select">
+              <option value="physical">💳 實體卡</option>
+              <option value="online">🌐 線上/網購</option>
+              <option value="apple_pay">🍎 Apple Pay</option>
+              <option value="line_pay">🟩 LINE Pay</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">消費類別 / 備註</label>
+          <select id="category" class="form-select mb-2" onchange="updateKeywordPlaceholder()">
+            <option value="general">🛍️ 一般消費</option>
+            <option value="dining">🍽️ 餐廳/外送</option>
+            <option value="travel">🏨 旅遊/訂房</option>
+            <option value="flight_ci">🌸 華航官網</option>
+            <option value="flight_cx">🌲 國泰官網</option>
+            <option value="flight_other">✈️ 其他航空</option>
+          </select>
+          <input type="text" id="keyword-input" class="form-control" placeholder="輸入店家關鍵字 (如: 麥當勞, Agoda, 停車)..." style="font-size:0.9rem;">
+        </div>
+
+        <button onclick="calculate()" class="btn-action">開始計算 <i class="fa-solid fa-calculator ms-2"></i></button>
+      </div>
+
+      <div id="result-area">
+        <div class="nccc-alert">
+          <div class="fw-bold mb-1"><i class="fa-solid fa-triangle-exclamation"></i> 留意小額支付無回饋</div>
+          連鎖速食(麥當勞/肯德基等)、飲料店、停車場、便利商店等通路，極高機率屬於「NCCC小額支付」，通常無回饋。
+          <div class="text-center">
+            <a href="https://www.nccc.com.tw/wps/wcm/connect/zh/home/BusinessOperations/CardBusiness/MicroPayment" target="_blank" class="nccc-btn">
+              <i class="fa-solid fa-magnifying-glass me-1"></i> 查詢 NCCC 官方名單
+            </a>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+          <span class="result-tag" id="scenario-tag">一般消費</span>
+          <span class="small fw-bold text-muted bg-white px-2 py-1 rounded border border-dashed" id="fx-info" style="display:none;"></span>
+        </div>
+
+        <div id="cards-container">
+          </div>
+
+        <div class="card-box mt-3 p-3 text-center" style="background:#f8fafc; border-style:dashed;">
+           <button onclick="recordResult()" class="btn btn-outline-dark rounded-pill fw-bold px-4 w-100" style="font-family:var(--font-hand); border-width:2px;">
+             <i class="fa-solid fa-check me-2"></i> 記帳這筆 (首選)
+           </button>
+        </div>
+      </div>
+      
+      <div class="disclaimer-text">
+        <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i> 使用者應自行留意本工具更新日期可能並非最新公告後的兌換、累積比例，儘管我們製作此網站及作出假設時已力求審慎，惟活動過程中演算結果應只視作指標，而非絕對準確計算。詳情請參考銀行所提供之活動說明。<br><br>
+        亞商卓盛華閣股份有限公司（包括但不限於母集團及旗下關聯子公司、分公司）、社團法人臺灣哩程研究社、「環哩匯・尊貴常旅客俱樂部」、「社團法人環球常旅客協會」均無須對任何人就由於使用或依賴源自此活動網站的資料而引致或與此有關的任何損失、損害或任何形式的費用（包括但不限於任何經濟損失或其他直接、間接或相應而生的損害）承擔責任。
+      </div>
+
+    </div>
+
+    <div id="page-status" class="page-section" style="display:none;">
+      <div class="card-box">
+        <h5 class="mb-3 text-primary"><i class="fa-solid fa-chart-pie me-2"></i>本期累積</h5>
+        <div id="status-container"></div>
+        <div class="mt-3 d-flex gap-2">
+           <button onclick="clearCurrentStats()" class="btn btn-sm btn-outline-danger flex-grow-1 rounded-pill fw-bold" style="border-width:2px; font-family:var(--font-hand);">重置本期</button>
+           <button onclick="exportData()" class="btn btn-sm btn-outline-primary flex-grow-1 rounded-pill fw-bold" style="border-width:2px; font-family:var(--font-hand);">匯出 JSON</button>
+        </div>
+      </div>
+      
+      <div class="card-box mt-3" style="background:#fffbeb; border-color:#fde68a;">
+        <h5 class="mb-3 text-warning" style="color:#b45309;"><i class="fa-solid fa-shield-halved me-2"></i>上限小管家</h5>
+        <div id="limits-container"></div>
+        <small class="text-muted d-block mt-2 text-center font-hand">上限會根據設定的結帳日自動重置</small>
+      </div>
+      
+       <div class="disclaimer-text">
+        <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i> 使用者應自行留意本工具更新日期可能並非最新公告後的兌換、累積比例，儘管我們製作此網站及作出假設時已力求審慎，惟活動過程中演算結果應只視作指標，而非絕對準確計算。詳情請參考銀行所提供之活動說明。<br><br>
+        亞商卓盛華閣股份有限公司（包括但不限於母集團及旗下關聯子公司、分公司）、社團法人臺灣哩程研究社、「環哩匯・尊貴常旅客俱樂部」、「社團法人環球常旅客協會」均無須對任何人就由於使用或依賴源自此活動網站的資料而引致或與此有關的任何損失、損害或任何形式的費用（包括但不限於任何經濟損失或其他直接、間接或相應而生的損害）承擔責任。
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-bottom">
+    <div class="nav-item active" onclick="switchPage('calc')">
+      <i class="fa-solid fa-calculator"></i> 計算
+    </div>
+    <div class="nav-item" onclick="switchPage('status')">
+      <i class="fa-solid fa-chart-simple"></i> 監控
+    </div>
+  </div>
+
+  <div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">⚙️ 設定與卡片管理</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          
+          <div class="setting-section">
+            <div class="setting-title">加碼資格確認 (自動扣繳)</div>
+            <div class="switch-group mb-2">
+              <span class="switch-label">匯豐 Live+ 自動扣繳 <small class="text-muted fw-normal">(精選+1%)</small></span>
+              <input class="form-check-input" type="checkbox" id="setting-hsbc-autopay" onchange="updateGlobalSetting('hsbc_autopay', this.checked)">
+            </div>
+          </div>
+
+          <div class="setting-section">
+            <div class="setting-title">內建神卡 (複雜邏輯)</div>
+            <div id="builtin-cards-list">
+              </div>
+          </div>
+
+          <div class="setting-section">
+            <div class="setting-title">自訂卡片 (簡易邏輯)</div>
+            <div id="custom-cards-list" class="mb-3"></div>
+            
+            <div class="bg-white p-3 rounded-3 border border-2 border-primary-subtle" style="border-style:dashed;">
+              <label class="small fw-bold text-primary mb-2 font-hand">＋ 新增卡片</label>
+              <input type="text" id="new-card-name" class="form-control mb-2" placeholder="卡片名稱 (如: 長榮極致)">
+              <div class="row g-2">
+                <div class="col-6">
+                  <input type="number" id="new-card-dom" class="form-control" placeholder="國內(元/哩)">
+                </div>
+                <div class="col-6">
+                  <input type="number" id="new-card-for" class="form-control" placeholder="國外(元/哩)">
+                </div>
+              </div>
+              <button onclick="addCustomCard()" class="btn btn-sm btn-primary w-100 mt-2 rounded-pill fw-bold font-hand">確認新增</button>
+            </div>
+          </div>
+
+          <div class="setting-section">
+            <div class="setting-title">帳單結帳日 (每月幾號)</div>
+            <div id="billing-days-list">
+              </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    /* =========================
+       哩程攻略 v10.0 (Final - Hybrid + DBS AoV)
+       ========================= */
+
+    const DB_UPDATE_DATE = "2026/01/22"; 
+
+    // 新增 dbs_aov
+    const BUILTIN_DEFS = [
+      { id: 'hsbc_live', name: '匯豐 Live+', default: true, note: '餐飲購物神卡' },
+      { id: 'dbs_aov',   name: '星展 傳說對決',default: true, note: 'LinePay 10%' },
+      { id: 'cube',      name: '國泰 CUBE',  default: true, note: '小樹點自選' },
+      { id: 'ctbc_ci',   name: '中信 華航鼎尊',default: true, note: '生日月 $6/哩' },
+      { id: 'taishin_cx',name: '台新 國泰世界',default: true, note: '越飛有哩 $5/哩' },
+      { id: 'hsbc_inf',  name: '匯豐 旅人無限',default: true, note: '國外 $10/哩' }
+    ];
+
+    // 星展結帳日預設為 4 號
+    const DEFAULT_BILLING = { hsbc:6, cube:18, ctbc:15, taishin:20, dbs:4, other:1 };
+    const RATES = { TWD:1, USD:33.5, JPY:0.225, EUR:36, CNY:4.6, KRW:0.025, THB:0.96, SGD:24.5 };
+    
+    const CUBE_KEYWORDS = {
+      'travel': ['travel','agoda','booking','hotels','airbnb','klook','kkday','雄獅','可樂','flight','航空','機票','海外','foreign'],
+      'dining': ['dining','餐廳','吃飯','鼎泰豐','壽司','火鍋','燒肉','牛排','星巴克','ubereats','foodpanda'],
+      'digital': ['online','momo','pchome','shopee','蝦皮','coupang','amazon','博客來','steam','netflix','spotify','disney','app store','google play'],
+      'select': ['carrefour','全聯','中油','台亞','高鐵','uber']
+    };
+
+    const LIVE_KEYWORDS = {
+      'dining': [
+        '餐廳','吃飯','外送','ubereats','foodpanda','燒肉','火鍋','麻辣','壽司','日式','居酒屋','餐酒館','酒吧','咖啡','甜點','牛排','鐵板燒','拉麵','茶六','屋馬','乾杯','buffet',
+        '王品','享鴨','夏慕尼','西堤','石二鍋','陶板屋','青花驕', 
+        '饗賓','饗饗','開飯','瓦城','鼎泰豐','海底撈','金大鋤','築間', 
+        '壽司郎','藏壽司','爭鮮','吉兆','明壽司',
+        '金色三麥','春大直','貳樓','涓豆腐','hooters','勝田', 
+        '麥當勞','星巴克','必勝客','達美樂', 
+        '富王','文公館','教父牛排','山海樓','鹽之華','牡丹','logy','inita', 
+        'ikea','莫凡彼','貴族世家'
+      ],
+      'shop': [
+        'momo','pchome','蝦皮','shopee','amazon','ebay','露天','friday','gomaji','淘寶',
+        'uniqlo','zara','h&m','net','gu','nike','adidas','outlet', 
+        '台北101','三井','微風','sogo','漢神','華泰','新光','skm','att', 
+        '美麗華','南紡','統一時代','遠雄','京站','citylink','夢時代','lalaport', 
+        '高島屋','中友','遠企','麗寶','比漾','大江','巨城','遠東','global mall','環球', 
+        '義大','台茂','宏匯','義享','noke','大魯閣','明曜','bellavita', 
+        '寶雅','無印良品','muji','屈臣氏','康是美','松本清','唐吉訶德'
+      ],
+      'entertainment': [
+        '新光影城','威秀','國賓','秀泰', 
+        '環球影城','迪士尼','吉卜力','樂天世界','legoland','safari', 
+        '兒童新樂園','x park','小人國','六福村','海洋公園','麗寶樂園','劍湖山','九族','尚順','義大遊樂', 
+        '巧虎','動物園','海生館','奇美博物館','小叮噹','野柳','埔心','飛牛','頑皮世界','美術館', 
+        '日月潭','太平山','阿里山','大雪山','墾丁','森林遊樂區'
+      ]
+    };
+
+    const CTBC_BOOKING_KEYWORDS = ['agoda','booking','hotels.com','expedia','trip.com','airbnb'];
+    
+    // Live+ 白名單 (速食)
+    const NCCC_FAST_FOOD = ['麥當勞','肯德基','漢堡王','摩斯','頂呱呱','必勝客','達美樂','拿坡里','subway'];
+    
+    // 絕對黑名單 (飲料、停車、特定店家)
+    const NCCC_BLACKLIST = ['八方雲集','爭鮮','路易莎','louisa','cama','50嵐','清心','迷客夏','可不可','停車','嘟嘟房','小額'];
+
+    // 共同黑名單 (絕對無回饋)
+    const COMMON_BLOCK = ['管理費','社區','稅','學費','水費','電費','瓦斯','罰','規費','健保','電信','中華電信','遠傳','台灣大','儲值','預借','分期'];
+
+    // 各卡完整黑名單
+    const CTBC_BLOCK = [...COMMON_BLOCK, '全聯','px','全支付','7-11','711','全家','萊爾富','ok超商','繳費','etoro','wise','revolut', ...NCCC_BLACKLIST];
+    
+    const HSBC_BLOCK_BASE = [...COMMON_BLOCK, '全聯','px','7-11','711','全家','萊爾富','ok超商','繳費','判決書','醫療','掛號','年費','手續費','賭博', ...NCCC_BLACKLIST];
+    
+    const TAISHIN_BLOCK = ['分期','全聯','px','7-11','711','全家','萊爾富','ok超商','繳費','國民年金','etag','三商美邦', ...NCCC_BLACKLIST];
+    
+    const CUBE_BLOCK = [...COMMON_BLOCK, '全聯','px','7-11','711','全家','萊爾富','ok超商','規費','路邊停車','醫療','etag','etoro','wise','賭博', ...NCCC_BLACKLIST];
+
+
+    // --- 狀態管理 ---
+    const DB_KEY = 'MILES_APP_V8_DATA';
+    function loadDB() {
+      const raw = localStorage.getItem(DB_KEY);
+      if(!raw) return initDB();
+      const db = JSON.parse(raw);
+      if(typeof db.settings.hsbc_autopay === 'undefined') db.settings.hsbc_autopay = true;
+      // 確保舊資料有 dbs billing
+      if(typeof db.settings.billingDays.dbs === 'undefined') db.settings.billingDays.dbs = 4;
+      return db;
+    }
+    function saveDB(data) { localStorage.setItem(DB_KEY, JSON.stringify(data)); }
+    function initDB() {
+      return {
+        settings: {
+          enabledBuiltins: BUILTIN_DEFS.map(c => c.id),
+          billingDays: { ...DEFAULT_BILLING },
+          hsbc_autopay: true
+        },
+        customCards: [], records: {}, limits: {}
+      };
+    }
+
+    // --- 計算核心 ---
+
+    function calculate() {
+      const db = loadDB();
+      const amt = parseFloat($('amount').value);
+      if(!amt) return alert('請輸入金額');
+      
+      const curr = $('currency').value;
+      const isForeign = curr !== 'TWD';
+      const isEUR = curr === 'EUR'; 
+      const rate = RATES[curr] || 1;
+      const twdBase = Math.round(amt * rate);
+      const twdSpend = isForeign ? Math.round(twdBase * 1.015) : twdBase;
+
+      const cat = $('category').value;
+      const pay = $('payment').value;
+      const kw = ($('keyword-input').value || '').toLowerCase();
+      const isBirthday = $('birthdayMode').checked;
+      const isFlyMode = $('flyMode').checked;
+      const target = $('redemption-target').value; 
+
+      let tags = [];
+      if(isForeign) tags.push('國外');
+      if(pay === 'line_pay') tags.push('LinePay');
+
+      let cubePlan = 'unknown';
+      let isLiveSelect = false;
+
+      // CUBE Keyword Check
+      if(isForeign || cat==='travel' || cat.startsWith('flight')) cubePlan = 'travel';
+      else {
+        for(let p in CUBE_KEYWORDS) {
+          if(CUBE_KEYWORDS[p].some(w => kw.includes(w))) { cubePlan = p; break; }
+        }
+        if(cubePlan==='unknown' && cat==='dining') cubePlan = 'dining';
+      }
+
+      // Live+ Keyword Check
+      if(cat==='dining') isLiveSelect = true;
+      else {
+        if(
+          LIVE_KEYWORDS['dining'].some(w => kw.includes(w)) || 
+          LIVE_KEYWORDS['shop'].some(w => kw.includes(w)) ||
+          LIVE_KEYWORDS['entertainment'].some(w => kw.includes(w))
+        ) {
+          isLiveSelect = true;
+        }
+      }
+      
+      // Live+ 特別判定：速食是否在白名單
+      const isLiveFastFood = NCCC_FAST_FOOD.some(w => kw.includes(w));
+      if(isLiveFastFood) isLiveSelect = true; // 強制視為精選
+
+      // 其他卡片是否要擋速食 (非Live+卡遇速食 = 擋)
+      const isBlockFastFood = isLiveFastFood; 
+
+      const isCtbcBooking = CTBC_BOOKING_KEYWORDS.some(w => kw.includes(w));
+
+      $('fx-info').style.display = isForeign ? 'inline-block' : 'none';
+      $('fx-info').innerText = `約 NT$${twdSpend}`;
+      $('scenario-tag').innerText = tags.length ? tags.join(' + ') : '一般消費';
+
+      let results = [];
+
+      // 1. 國泰 CUBE (擋速食 + 黑名單 + 支付限制)
+      if(db.settings.enabledBuiltins.includes('cube')) {
+        let miles = 0;
+        let note = '';
+        
+        let isBlocked = CUBE_BLOCK.some(w => kw.includes(w));
+        if (isBlockFastFood) isBlocked = true; // CUBE 擋速食
+
+        if (isBlocked) {
+             miles = 0; note = `<span class="text-danger fw-bold">🚫 非回饋/小額支付</span>`;
+        } else {
+            let pRate = 0.003; 
+            let planName = '一般消費(0.3%)';
+            const isDowngrade = (pay === 'line_pay') || kw.includes('分期');
+            
+            if (isDowngrade) {
+                pRate = 0.003;
+                planName = '一般消費 (支付/分期限制)';
+            } else {
+                const planMap = { 'travel':'趣旅行', 'dining':'樂饗購', 'digital':'玩數位', 'select':'集精選' };
+                if(cubePlan !== 'unknown' && planMap[cubePlan]) {
+                  pRate = 0.03;
+                  planName = `切換至【${planMap[cubePlan]}】(3%)`;
+                } else if(isForeign) { 
+                   pRate = 0.03; planName = `切換至【趣旅行】(3%)`;
+                }
+            }
+
+            const rawPoints = Math.floor(twdBase * pRate);
+            let noteSuffix = '';
+            if(target === 'CI') {
+                miles = Math.floor(rawPoints * (1000 / 720));
+                noteSuffix = `720點⇄1000哩 (華航)`;
+            } else {
+                miles = Math.floor(rawPoints * (1000 / 360));
+                noteSuffix = `360點⇄1000哩 (亞萬)`;
+            }
+            note = `${planName}<br><span class="text-muted small">${noteSuffix}</span>`;
+        }
+        results.push({ id:'cube', name:'國泰 CUBE', miles: miles, note: note, type:'mile' });
+      }
+
+      // 2. 匯豐 Live+ (速食放行 + 歐盟擋 + 黑名單)
+      if(db.settings.enabledBuiltins.includes('hsbc_live')) {
+        let miles = 0;
+        let note = '';
+        
+        let isBlocked = false;
+        if (isEUR) {
+            isBlocked = true; note = `<span class="text-danger fw-bold">🚫 歐盟實體不回饋</span>`;
+        } else if (HSBC_BLOCK_BASE.some(w => kw.includes(w))) {
+            isBlocked = true; note = `<span class="text-danger fw-bold">🚫 非回饋項目</span>`;
+        }
+        
+        if (isBlocked) {
+            miles = 0;
+        } else {
+            let displayRate = '0.88%';
+            let displayType = '一般';
+            let warning = '';
+            const hasAutopay = db.settings.hsbc_autopay;
+            let totalPoints = twdBase * 0.0088; 
+            
+            if(isLiveSelect) { 
+               displayType = '精選';
+               displayRate = '3.88%';
+               let bonus1 = twdBase * 0.03;
+               if(bonus1 > 888) { bonus1 = 888; warning = '⚠️ 通路加碼已達上限'; }
+               totalPoints += bonus1;
+               let bonus2Rate = 0;
+               if(isForeign) { bonus2Rate = 0.01; displayType = '國外精選'; displayRate = '4.88%'; } 
+               else if(hasAutopay) { bonus2Rate = 0.01; displayRate = '4.88%'; } 
+               if(isForeign && hasAutopay) displayRate = '5.88%'; 
+               if(bonus2Rate > 0) {
+                 let bonus2 = twdBase * 0.01;
+                 if(bonus2 > 200) { bonus2 = 200; warning = warning ? '⚠️ 雙重加碼已達上限' : '⚠️ 任務加碼已達上限'; }
+                 totalPoints += bonus2;
+               }
+            } else {
+               if(hasAutopay) { displayRate = '1.88%'; }
+            }
+            const cashPoints = Math.floor(totalPoints);
+            miles = cashPoints * 2; 
+            note = `${displayType} ${displayRate} <br><span class="text-muted small">1點現金積點⇄2哩</span>`;
+            if(warning) note = `${displayType} (混合費率)<br><span class="warning-badge">${warning}</span>`;
+        }
+        results.push({ id:'hsbc_live', name:'匯豐 Live+', miles: miles, note: note, type:'mile' });
+      }
+
+      // NEW: 星展 傳說對決 (LinePay 專用)
+      if(db.settings.enabledBuiltins.includes('dbs_aov')) {
+        let miles = 0;
+        let note = '';
+        
+        // 嚴格限制：只算 LinePay
+        if (pay === 'line_pay') {
+            const limit = 11363; // 1000點 / 10%
+            let calcBase = twdSpend;
+            let warning = '';
+            
+            if (twdSpend > limit) {
+                calcBase = limit;
+                warning = '⚠️ 超出甜蜜點 (11,363元)';
+            }
+
+            // 原始點數 (10% 現金積點)
+            let rawPoints = calcBase * 0.10;
+            
+            // 轉換匯率
+            let convStr = '';
+            if(target === 'CI') {
+                // 華航: 90點=100哩 (1點=1.111...哩)
+                miles = Math.floor(rawPoints * (100 / 90));
+                convStr = '90點⇄100哩 (華航)';
+            } else {
+                // 亞萬/長榮: 50點=100哩 (1點=2哩)
+                miles = Math.floor(rawPoints * 2);
+                convStr = '50點⇄100哩 (長榮/亞萬)';
+            }
+
+            note = `LinePay 10%<br><span class="text-muted small">${convStr}</span>`;
+            if(warning) {
+                note = `LinePay 10% (上限內)<br><span class="warning-badge">${warning}</span>`;
+            }
+        } else {
+             miles = 0;
+             note = `<span class="text-muted">僅限 LinePay</span>`;
+        }
+        
+        results.push({ id:'dbs_aov', name:'星展 傳說對決', miles: miles, note: note, type:'mile' });
+      }
+
+
+      // 3. 中信 華航鼎尊 (擋速食 + 黑名單)
+      if(db.settings.enabledBuiltins.includes('ctbc_ci')) {
+        let div = 18;
+        let note = '一般 $18/哩';
+        let miles = 0;
+
+        let isBlocked = CTBC_BLOCK.some(w => kw.includes(w));
+        if(isBlockFastFood) isBlocked = true;
+
+        if (isBlocked) {
+            miles = 0;
+            note = `<span class="text-danger fw-bold">🚫 非回饋項目</span>`;
+        } else {
+            if (cat === 'flight_ci') {
+                div = 9; note = '華航官網 $9/哩';
+            } 
+            else if (isCtbcBooking) { 
+                div = 9; note = '指定訂房網 $9/哩';
+            }
+            else if(isForeign && (pay === 'physical' || pay === 'apple_pay')) {
+                 if(isBirthday) {
+                     div = 6; note = `生日海外實體 $6/哩`;
+                 } else {
+                     div = 9; note = `海外實體 $9/哩`;
+                 }
+            }
+            else if(isForeign && pay === 'online') {
+                div = 18; note = '海外網購 $18/哩';
+            }
+            if(div === 9 || div === 6) {
+                note += ` <br><span class="text-danger small" style="font-size:0.7em;">(含加碼上限)</span>`;
+            }
+            miles = Math.floor(twdBase/div);
+        }
+        results.push({ id:'ctbc_ci', name:'中信 華航', miles: miles, note: note, type:'mile' });
+      }
+
+      // 5. 台新 國泰世界 (擋速食 + 黑名單 + 分期)
+      if(db.settings.enabledBuiltins.includes('taishin_cx')) {
+        let miles = 0;
+        let note = '';
+
+        let isBlocked = TAISHIN_BLOCK.some(w => kw.includes(w));
+        if(isBlockFastFood) isBlocked = true;
+
+        if (isBlocked) {
+             miles = 0; 
+             note = `<span class="text-danger fw-bold">🚫 非回饋項目</span>`;
+        } else {
+            let div = isForeign ? 15 : 22; 
+            note = `約${div}元/哩`;
+            const isMobilePay = (pay === 'apple_pay' || pay === 'line_pay');
+
+            if(isFlyMode && !isMobilePay) {
+                if(cat === 'flight_cx') { div = 5; note = `越飛(官網) $5/哩`; }
+                else if(['agoda','booking','klook','kkday','expedia','hotels','昇恆昌','采盟'].some(w=>kw.includes(w))) { div = 5; note = `越飛(指定旅遊) $5/哩`; }
+                else if(isForeign && pay === 'physical') { div = 5; note = `越飛(海外實體) $5/哩`; }
+            } else if (isFlyMode && isMobilePay) {
+                 note += ` <span class="text-danger small">(Pay無$5)</span>`;
+            }
+            miles = Math.floor(twdBase/div);
+        }
+        results.push({ id:'taishin_cx', name:'台新 國泰', miles: miles, note: note, type:'mile' });
+      }
+
+      // 6. 匯豐 旅人 (擋速食 + 黑名單)
+      if(db.settings.enabledBuiltins.includes('hsbc_inf')) {
+        let miles = 0;
+        let note = '';
+        
+        let isBlocked = HSBC_BLOCK_BASE.some(w => kw.includes(w));
+        if(isBlockFastFood) isBlocked = true; // 旅人卡沒有速食白名單
+
+        if (isBlocked) {
+             miles = 0; note = `<span class="text-danger fw-bold">🚫 非回饋項目</span>`;
+        } else {
+            let div = isForeign ? 10 : 18;
+            if(cat.startsWith('flight')) div = 10;
+            note = `約${div}元/哩`;
+            miles = Math.floor(twdBase/div);
+        }
+        results.push({ id:'hsbc_inf', name:'匯豐 旅人', miles: miles, note: note, type:'mile' });
+      }
+
+      // 自訂卡片
+      db.customCards.forEach(c => {
+        let div = isForeign ? c.forRate : c.domRate;
+        if(!div || div <= 0) div = 999;
+        results.push({ id: c.id, name: c.name, miles: Math.floor(twdBase / div), note: `設定${div}元/哩`, type: 'custom' });
+      });
+
+      // 排序
+      results.forEach(r => { r.tpm = r.miles > 0 ? (twdSpend / r.miles) : 999; });
+      results.sort((a,b) => b.miles - a.miles);
+      window.currentBest = { ...results[0], twdSpend, twdBase };
+      renderResults(results, twdSpend);
+    }
+
+    // --- 渲染與輔助功能 ---
+
+    function renderResults(list, spend) {
+      const con = $('cards-container');
+      con.innerHTML = '';
+      $('result-area').style.display = 'block';
+      if(list.length === 0) {
+        con.innerHTML = '<div class="text-center p-3 text-muted">沒有啟用的卡片</div>';
+        return;
+      }
+      list.forEach((c, idx) => {
+        const isWinner = idx === 0;
+        const div = document.createElement('div');
+        div.className = `plan-card ${isWinner ? 'plan-winner' : ''}`;
+        let badge = isWinner ? `<span class="winner-badge"><i class="fa-solid fa-crown"></i> WINNER</span>` : '';
+        div.innerHTML = `
+          ${badge}
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h4 class="card-name">${c.name}</h4>
+              <div class="text-muted small mt-1 font-hand">${c.note}</div>
+            </div>
+            <div class="text-end">
+              <div class="card-miles">${c.miles} <small style="font-size:0.5em; color:#64748b;">哩</small></div>
+              <div class="card-tpm">${c.tpm < 100 ? c.tpm.toFixed(1) : '>100'} 元/哩</div>
+            </div>
+          </div>
+        `;
+        con.appendChild(div);
+      });
+    }
+
+    function getBillingCycle(cardPrefix, billingDay) {
+      const now = new Date();
+      const today = now.getDate();
+      const monthOffset = (today > billingDay) ? 1 : 0;
+      const d = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    }
+
+    function recordResult() {
+      if(!window.currentBest) return;
+      const { id, name, miles, twdSpend, twdBase } = window.currentBest;
+      if(!confirm(`確定記帳？\n卡片：${name}\n累積：${miles} 哩`)) return;
+
+      const db = loadDB();
+      const now = new Date();
+      const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+      
+      if(!db.records[monthKey]) db.records[monthKey] = {};
+      if(!db.records[monthKey][id]) db.records[monthKey][id] = { miles:0, spend:0, name };
+      db.records[monthKey][id].miles += miles;
+      db.records[monthKey][id].spend += twdSpend;
+
+      let day = db.settings.billingDays[id.split('_')[0]] || db.settings.billingDays['other'] || 1;
+      // 星展特殊處理 ID
+      if(id === 'dbs_aov') day = db.settings.billingDays['dbs'] || 4;
+
+      const cycleKey = getBillingCycle(null, day); 
+      const limitKey = `${cycleKey}-${id}`;
+      if(!db.limits[limitKey]) db.limits[limitKey] = { spend:0, points:0, startDay: day };
+      db.limits[limitKey].spend += twdBase; 
+      db.limits[limitKey].points += miles;
+
+      saveDB(db);
+      alert('✅ 已記帳！');
+      updateStatusUI();
+    }
+
+    function updateStatusUI() {
+      const db = loadDB();
+      const now = new Date();
+      const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+      const statusCon = $('status-container');
+      const monthData = db.records[monthKey] || {};
+      let html = '';
+      if(Object.keys(monthData).length === 0) {
+        html = '<div class="text-center py-3 text-muted">本月尚無紀錄</div>';
+      } else {
+        html = '<ul class="list-group list-group-flush">';
+        for(let id in monthData) {
+          html += `<li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-bottom border-dashed">
+            <span class="fw-bold text-secondary">${monthData[id].name}</span>
+            <span class="fw-bold text-primary" style="font-family:var(--font-hand);">+${monthData[id].miles}</span>
+          </li>`;
+        }
+        html += '</ul>';
+      }
+      statusCon.innerHTML = html;
+
+      const limitsCon = $('limits-container');
+      let limitHtml = '';
+      
+      const targets = [
+        { id: 'hsbc_live', name: '匯豐 Live+', limit: 29600, type:'spend' },
+        { id: 'ctbc_ci',   name: '中信 華航',  limit: 1440000, type:'spend' },
+        { id: 'dbs_aov',   name: '星展 傳說對決', limit: 11363, type:'spend' } 
+      ];
+      targets.forEach(t => {
+        let prefix = t.id.split('_')[0];
+        // 星展前綴特殊對應
+        if(t.id === 'dbs_aov') prefix = 'dbs';
+
+        const day = db.settings.billingDays[prefix] || 1;
+        const cycleKey = getBillingCycle(null, day);
+        const dataKey = `${cycleKey}-${t.id}`;
+        const record = db.limits[dataKey] || { spend:0, points:0 };
+        
+        const current = record.spend; 
+        
+        const percent = Math.min(100, Math.round((current / t.limit) * 100));
+        let color = 'bg-success';
+        if(percent > 80) color = 'bg-warning';
+        if(percent >= 100) color = 'bg-danger';
+
+        let subMsg = '';
+        if(t.id === 'ctbc_ci') subMsg = '<div class="text-danger small mt-1" style="font-size:0.7em;">(若為生日月，上限減半約 72 萬)</div>';
+        if(t.id === 'dbs_aov') subMsg = '<div class="text-danger small mt-1" style="font-size:0.7em;">(LinePay 10% 甜蜜點)</div>';
+
+        limitHtml += `
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small mb-1">
+              <strong>${t.name}</strong>
+              <span>$${current.toLocaleString()} / $${t.limit.toLocaleString()} (${percent}%)</span>
+            </div>
+            <div class="progress" style="height: 8px; border-radius:4px; background:#e2e8f0;">
+              <div class="progress-bar ${color}" style="width: ${percent}%; border-radius:4px;"></div>
+            </div>
+            ${subMsg}
+            <div class="text-end text-muted mt-1" style="font-size:0.7rem; font-family:var(--font-hand);">結帳日: 每月${day}號 (本期: ${cycleKey})</div>
+          </div>
+        `;
+      });
+      limitsCon.innerHTML = limitHtml || '<div class="text-center small text-muted">無須監控的卡片</div>';
+    }
+
+    function openSettings() { renderSettings(); new bootstrap.Modal($('settingsModal')).show(); }
+    function renderSettings() {
+      const db = loadDB();
+      $('setting-hsbc-autopay').checked = db.settings.hsbc_autopay;
+      
+      const builtinCon = $('builtin-cards-list');
+      builtinCon.innerHTML = '';
+      BUILTIN_DEFS.forEach(def => {
+        const isOn = db.settings.enabledBuiltins.includes(def.id);
+        builtinCon.innerHTML += `
+          <div class="switch-group mb-2">
+            <span class="switch-label">${def.name} <span class="text-muted small fw-normal ms-2">(${def.note})</span></span>
+            <input class="form-check-input" type="checkbox" ${isOn?'checked':''} onchange="toggleBuiltin('${def.id}')">
+          </div>
+        `;
+      });
+      const customCon = $('custom-cards-list');
+      customCon.innerHTML = '';
+      if(db.customCards.length === 0) customCon.innerHTML = '<div class="text-muted small text-center mb-2">尚無自訂卡片</div>';
+      db.customCards.forEach((c, idx) => {
+        customCon.innerHTML += `
+          <div class="custom-card-item">
+            <div>
+              <div class="fw-bold">${c.name}</div>
+              <div class="small text-muted font-hand">國內 ${c.domRate} / 國外 ${c.forRate}</div>
+            </div>
+            <div class="delete-btn" onclick="delCustomCard(${idx})"><i class="fa-solid fa-trash"></i></div>
+          </div>
+        `;
+      });
+      const billCon = $('billing-days-list');
+      billCon.innerHTML = '';
+      // 新增 dbs
+      const banks = { hsbc:'匯豐', cube:'國泰', ctbc:'中信', taishin:'台新', dbs:'星展', other:'其他' };
+      for(let key in banks) {
+        const day = db.settings.billingDays[key] || 1;
+        billCon.innerHTML += `
+          <div class="d-flex justify-content-between align-items-center mb-2 bg-white p-2 rounded border" style="border:2px solid #e2e8f0 !important;">
+            <span class="fw-bold text-secondary font-hand">${banks[key]}</span>
+            <input type="number" class="form-control form-control-sm w-25 text-center" value="${day}" onchange="updateBilling('${key}', this.value)">
+          </div>
+        `;
+      }
+    }
+    function updateGlobalSetting(key, val) { const db = loadDB(); db.settings[key] = val; saveDB(db); }
+    function toggleBuiltin(id) { const db = loadDB(); const idx = db.settings.enabledBuiltins.indexOf(id); if(idx >= 0) db.settings.enabledBuiltins.splice(idx, 1); else db.settings.enabledBuiltins.push(id); saveDB(db); }
+    function addCustomCard() { const name = $('new-card-name').value; const dom = parseFloat($('new-card-dom').value); const fore = parseFloat($('new-card-for').value); if(!name || !dom || !fore) return alert('請填寫完整'); const db = loadDB(); db.customCards.push({ id: `cust_${Date.now()}`, name, domRate: dom, forRate: fore }); saveDB(db); renderSettings(); $('new-card-name').value = ''; $('new-card-dom').value = ''; $('new-card-for').value = ''; }
+    function delCustomCard(idx) { if(!confirm('刪除此卡？')) return; const db = loadDB(); db.customCards.splice(idx, 1); saveDB(db); renderSettings(); }
+    function updateBilling(key, val) { const db = loadDB(); db.settings.billingDays[key] = parseInt(val) || 1; saveDB(db); }
+    function $(id) { return document.getElementById(id); }
+    function toggleSwitch(id) { /* UI */ }
+    function switchPage(p) { document.querySelectorAll('.page-section').forEach(e => e.style.display='none'); $(`page-${p}`).style.display='block'; document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active')); event.currentTarget.classList.add('active'); if(p==='status') updateStatusUI(); window.scrollTo(0,0); }
+    function clearCurrentStats() { if(!confirm('確定重置？')) return; const db = loadDB(); const now = new Date(); const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`; db.records[monthKey] = {}; saveDB(db); updateStatusUI(); }
+    function exportData() { const db = loadDB(); const blob = new Blob([JSON.stringify(db,null,2)], {type : 'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'miles_backup_v10_0.json'; a.click(); }
+    
+    // 初始化
+    window.onload = function() { 
+        updateStatusUI();
+        document.querySelectorAll('.db-date-display').forEach(el => el.innerText = DB_UPDATE_DATE);
+    };
+  </script>
+</body>
+</html>
