@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>TDC環哩匯 x 航空卡消費累哩工具 v10.0</title>
+  <title>TDC環哩匯 x 航空卡消費累哩工具 v10.0 (台新精準版)</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Mali:wght@500;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -485,7 +485,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     /* =========================
-       哩程攻略 v10.0 (Final - Hybrid + DBS AoV)
+       哩程攻略 v10.0 (台新精準監控版)
        ========================= */
 
     const DB_UPDATE_DATE = "2026/01/22"; 
@@ -568,7 +568,6 @@
       if(!raw) return initDB();
       const db = JSON.parse(raw);
       if(typeof db.settings.hsbc_autopay === 'undefined') db.settings.hsbc_autopay = true;
-      // 確保舊資料有 dbs billing
       if(typeof db.settings.billingDays.dbs === 'undefined') db.settings.billingDays.dbs = 4;
       return db;
     }
@@ -737,12 +736,11 @@
         results.push({ id:'hsbc_live', name:'匯豐 Live+', miles: miles, note: note, type:'mile' });
       }
 
-      // NEW: 星展 傳說對決 (LinePay 專用)
+      // 3. 星展 傳說對決 (LinePay 專用)
       if(db.settings.enabledBuiltins.includes('dbs_aov')) {
         let miles = 0;
         let note = '';
         
-        // 嚴格限制：只算 LinePay
         if (pay === 'line_pay') {
             const limit = 11363; // 1000點 / 10%
             let calcBase = twdSpend;
@@ -753,17 +751,13 @@
                 warning = '⚠️ 超出甜蜜點 (11,363元)';
             }
 
-            // 原始點數 (10% 現金積點)
             let rawPoints = calcBase * 0.10;
             
-            // 轉換匯率
             let convStr = '';
             if(target === 'CI') {
-                // 華航: 90點=100哩 (1點=1.111...哩)
                 miles = Math.floor(rawPoints * (100 / 90));
                 convStr = '90點⇄100哩 (華航)';
             } else {
-                // 亞萬/長榮: 50點=100哩 (1點=2哩)
                 miles = Math.floor(rawPoints * 2);
                 convStr = '50點⇄100哩 (長榮/亞萬)';
             }
@@ -781,7 +775,7 @@
       }
 
 
-      // 3. 中信 華航鼎尊 (擋速食 + 黑名單)
+      // 4. 中信 華航鼎尊
       if(db.settings.enabledBuiltins.includes('ctbc_ci')) {
         let div = 18;
         let note = '一般 $18/哩';
@@ -818,10 +812,11 @@
         results.push({ id:'ctbc_ci', name:'中信 華航', miles: miles, note: note, type:'mile' });
       }
 
-      // 5. 台新 國泰世界 (擋速食 + 黑名單 + 分期)
+      // 5. 台新 國泰世界 (智慧監控版)
       if(db.settings.enabledBuiltins.includes('taishin_cx')) {
         let miles = 0;
         let note = '';
+        let isFlyMore = false; // 預設非越飛
 
         let isBlocked = TAISHIN_BLOCK.some(w => kw.includes(w));
         if(isBlockFastFood) isBlocked = true;
@@ -834,26 +829,32 @@
             note = `約${div}元/哩`;
             const isMobilePay = (pay === 'apple_pay' || pay === 'line_pay');
 
+            // 越飛邏輯判定 (僅限 $5/哩 類別)
             if(isFlyMode && !isMobilePay) {
-                if(cat === 'flight_cx') { div = 5; note = `越飛(官網) $5/哩`; }
-                else if(['agoda','booking','klook','kkday','expedia','hotels','昇恆昌','采盟'].some(w=>kw.includes(w))) { div = 5; note = `越飛(指定旅遊) $5/哩`; }
-                else if(isForeign && pay === 'physical') { div = 5; note = `越飛(海外實體) $5/哩`; }
+                if(cat === 'flight_cx') { 
+                    div = 5; note = `越飛(官網) $5/哩`; isFlyMore = true; 
+                }
+                else if(['agoda','booking','klook','kkday','expedia','hotels','昇恆昌','采盟'].some(w=>kw.includes(w))) { 
+                    div = 5; note = `越飛(指定旅遊) $5/哩`; isFlyMore = true; 
+                }
+                else if(isForeign && pay === 'physical') { 
+                    div = 5; note = `越飛(海外實體) $5/哩`; isFlyMore = true; 
+                }
             } else if (isFlyMode && isMobilePay) {
                  note += ` <span class="text-danger small">(Pay無$5)</span>`;
             }
             miles = Math.floor(twdBase/div);
         }
-        results.push({ id:'taishin_cx', name:'台新 國泰', miles: miles, note: note, type:'mile' });
+        // 將判斷結果寫入物件
+        results.push({ id:'taishin_cx', name:'台新 國泰', miles: miles, note: note, type:'mile', isFlyMore: isFlyMore });
       }
 
-      // 6. 匯豐 旅人 (擋速食 + 黑名單)
+      // 6. 匯豐 旅人
       if(db.settings.enabledBuiltins.includes('hsbc_inf')) {
         let miles = 0;
         let note = '';
-        
         let isBlocked = HSBC_BLOCK_BASE.some(w => kw.includes(w));
-        if(isBlockFastFood) isBlocked = true; // 旅人卡沒有速食白名單
-
+        if(isBlockFastFood) isBlocked = true; 
         if (isBlocked) {
              miles = 0; note = `<span class="text-danger fw-bold">🚫 非回饋項目</span>`;
         } else {
@@ -921,7 +922,7 @@
 
     function recordResult() {
       if(!window.currentBest) return;
-      const { id, name, miles, twdSpend, twdBase } = window.currentBest;
+      const { id, name, miles, twdSpend, twdBase, isFlyMore } = window.currentBest;
       if(!confirm(`確定記帳？\n卡片：${name}\n累積：${miles} 哩`)) return;
 
       const db = loadDB();
@@ -934,17 +935,26 @@
       db.records[monthKey][id].spend += twdSpend;
 
       let day = db.settings.billingDays[id.split('_')[0]] || db.settings.billingDays['other'] || 1;
-      // 星展特殊處理 ID
       if(id === 'dbs_aov') day = db.settings.billingDays['dbs'] || 4;
 
-      const cycleKey = getBillingCycle(null, day); 
-      const limitKey = `${cycleKey}-${id}`;
-      if(!db.limits[limitKey]) db.limits[limitKey] = { spend:0, points:0, startDay: day };
-      db.limits[limitKey].spend += twdBase; 
-      db.limits[limitKey].points += miles;
+      // 台新精準監控邏輯: 
+      // 只有當它是台新卡 且 符合越飛資格 (isFlyMore=true) 時，才寫入 Limits。
+      // 其他卡片維持原狀 (預設寫入)。
+      let addToLimit = true;
+      if (id === 'taishin_cx' && !isFlyMore) {
+          addToLimit = false; // 台新一般消費不計入越飛額度
+      }
+
+      if (addToLimit) {
+          const cycleKey = getBillingCycle(null, day); 
+          const limitKey = `${cycleKey}-${id}`;
+          if(!db.limits[limitKey]) db.limits[limitKey] = { spend:0, points:0, startDay: day };
+          db.limits[limitKey].spend += twdBase; 
+          db.limits[limitKey].points += miles;
+      }
 
       saveDB(db);
-      alert('✅ 已記帳！');
+      alert('✅ 已記帳！' + (id==='taishin_cx' && !isFlyMore ? '\n(一般消費不佔越飛額度)' : ''));
       updateStatusUI();
     }
 
@@ -975,11 +985,12 @@
       const targets = [
         { id: 'hsbc_live', name: '匯豐 Live+', limit: 29600, type:'spend' },
         { id: 'ctbc_ci',   name: '中信 華航',  limit: 1440000, type:'spend' },
-        { id: 'dbs_aov',   name: '星展 傳說對決', limit: 11363, type:'spend' } 
+        { id: 'dbs_aov',   name: '星展 傳說對決', limit: 11363, type:'spend' },
+        { id: 'taishin_cx',name: '台新 國泰(越飛)', limit: 1000000, type:'spend' }
       ];
+
       targets.forEach(t => {
         let prefix = t.id.split('_')[0];
-        // 星展前綴特殊對應
         if(t.id === 'dbs_aov') prefix = 'dbs';
 
         const day = db.settings.billingDays[prefix] || 1;
@@ -997,6 +1008,7 @@
         let subMsg = '';
         if(t.id === 'ctbc_ci') subMsg = '<div class="text-danger small mt-1" style="font-size:0.7em;">(若為生日月，上限減半約 72 萬)</div>';
         if(t.id === 'dbs_aov') subMsg = '<div class="text-danger small mt-1" style="font-size:0.7em;">(LinePay 10% 甜蜜點)</div>';
+        if(t.id === 'taishin_cx') subMsg = '<div class="text-muted small mt-1" style="font-size:0.7em;">(越飛有哩上限20萬哩，只計算$5/哩之消費)</div>';
 
         limitHtml += `
           <div class="mb-3">
@@ -1047,7 +1059,6 @@
       });
       const billCon = $('billing-days-list');
       billCon.innerHTML = '';
-      // 新增 dbs
       const banks = { hsbc:'匯豐', cube:'國泰', ctbc:'中信', taishin:'台新', dbs:'星展', other:'其他' };
       for(let key in banks) {
         const day = db.settings.billingDays[key] || 1;
