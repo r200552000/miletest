@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>TDC環哩匯 x 航空卡消費累哩工具 v10.0 (台新精準版)</title>
+  <title>TDC環哩匯 x 航空卡消費累哩工具 v10.0 (年度監控最終版)</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Mali:wght@500;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,7 +11,7 @@
 
   <style>
     /* =========================
-       CSS 樣式表 (v10.0 Final)
+       CSS 樣式表 (v10.0 Final + Annual)
        ========================= */
     :root {
       --bg-main: #fffdf9;
@@ -98,7 +98,7 @@
       box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
     }
     
-    #amount { color: var(--primary) !important; font-size: 1.5rem; letter-spacing: 1px; font-family: var(--font-hand); }
+    #amount { color: var(--primary) !important; font-size: 1.5rem; letter-spacing: 1px; font-family: var(--font-hand); transition: 0.3s; }
     
     /* Buttons */
     .btn-action {
@@ -191,6 +191,20 @@
       font-size: 0.8rem;
       text-decoration: none;
       box-shadow: 2px 2px 0 rgba(245, 158, 11, 0.2);
+    }
+
+    /* Warning for Other Currency */
+    #other-currency-warning {
+        display: none;
+        color: #dc2626;
+        background: #fef2f2;
+        padding: 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-top: 8px;
+        border: 1px dashed #fecaca;
+        font-family: var(--font-hand);
     }
 
     /* Bottom Nav */
@@ -320,12 +334,15 @@
           <div class="input-group">
             <input type="number" id="amount" class="form-control" placeholder="0" inputmode="decimal">
           </div>
+          <div id="other-currency-warning">
+             <i class="fa-solid fa-circle-exclamation me-1"></i> ⚠️ 匯率未知，請直接輸入等值台幣金額
+          </div>
         </div>
 
         <div class="row g-2 mb-3">
           <div class="col-6">
             <label class="form-label">幣別</label>
-            <select id="currency" class="form-select">
+            <select id="currency" class="form-select" onchange="toggleCurrencyUI()">
               <option value="TWD">🇹🇼 TWD</option>
               <option value="JPY">🇯🇵 JPY</option>
               <option value="USD">🇺🇸 USD</option>
@@ -485,7 +502,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     /* =========================
-       哩程攻略 v10.0 (台新精準監控版)
+       哩程攻略 v10.0 (年度監控最終版)
        ========================= */
 
     const DB_UPDATE_DATE = "2026/01/22"; 
@@ -502,7 +519,7 @@
 
     // 星展結帳日預設為 4 號
     const DEFAULT_BILLING = { hsbc:6, cube:18, ctbc:15, taishin:20, dbs:4, other:1 };
-    const RATES = { TWD:1, USD:33.5, JPY:0.225, EUR:36, CNY:4.6, KRW:0.025, THB:0.96, SGD:24.5 };
+    const RATES = { TWD:1, USD:33.5, JPY:0.225, EUR:36, CNY:4.6, KRW:0.025, THB:0.96, SGD:24.5, other:1 };
     
     const CUBE_KEYWORDS = {
       'travel': ['travel','agoda','booking','hotels','airbnb','klook','kkday','雄獅','可樂','flight','航空','機票','海外','foreign'],
@@ -583,6 +600,23 @@
       };
     }
 
+    // --- UI 互動: 幣別切換 ---
+    function toggleCurrencyUI() {
+       const curr = $('currency').value;
+       const amtInput = $('amount');
+       const warn = $('other-currency-warning');
+       
+       if(curr === 'other') {
+          amtInput.classList.add('border-danger');
+          amtInput.placeholder = '請輸入折算台幣';
+          warn.style.display = 'block';
+       } else {
+          amtInput.classList.remove('border-danger');
+          amtInput.placeholder = '0';
+          warn.style.display = 'none';
+       }
+    }
+
     // --- 計算核心 ---
 
     function calculate() {
@@ -591,9 +625,9 @@
       if(!amt) return alert('請輸入金額');
       
       const curr = $('currency').value;
-      const isForeign = curr !== 'TWD';
+      const isForeign = (curr !== 'TWD' && curr !== 'other'); // "其他"視為台幣(因使用者已換算)
       const isEUR = curr === 'EUR'; 
-      const rate = RATES[curr] || 1;
+      const rate = RATES[curr] || 1; 
       const twdBase = Math.round(amt * rate);
       const twdSpend = isForeign ? Math.round(twdBase * 1.015) : twdBase;
 
@@ -606,6 +640,7 @@
 
       let tags = [];
       if(isForeign) tags.push('國外');
+      if(curr === 'other') tags.push('手動匯率');
       if(pay === 'line_pay') tags.push('LinePay');
 
       let cubePlan = 'unknown';
@@ -641,7 +676,7 @@
 
       const isCtbcBooking = CTBC_BOOKING_KEYWORDS.some(w => kw.includes(w));
 
-      $('fx-info').style.display = isForeign ? 'inline-block' : 'none';
+      $('fx-info').style.display = (isForeign || curr === 'other') ? 'inline-block' : 'none';
       $('fx-info').innerText = `約 NT$${twdSpend}`;
       $('scenario-tag').innerText = tags.length ? tags.join(' + ') : '一般消費';
 
@@ -929,25 +964,33 @@
       const now = new Date();
       const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
       
+      // 1. 紀錄到「本期累積」(讓使用者知道這筆刷了多少)
       if(!db.records[monthKey]) db.records[monthKey] = {};
       if(!db.records[monthKey][id]) db.records[monthKey][id] = { miles:0, spend:0, name };
       db.records[monthKey][id].miles += miles;
       db.records[monthKey][id].spend += twdSpend;
 
+      // 2. 處理「上限監控」(Limits)
       let day = db.settings.billingDays[id.split('_')[0]] || db.settings.billingDays['other'] || 1;
       if(id === 'dbs_aov') day = db.settings.billingDays['dbs'] || 4;
 
-      // 台新精準監控邏輯: 
-      // 只有當它是台新卡 且 符合越飛資格 (isFlyMore=true) 時，才寫入 Limits。
-      // 其他卡片維持原狀 (預設寫入)。
       let addToLimit = true;
       if (id === 'taishin_cx' && !isFlyMore) {
           addToLimit = false; // 台新一般消費不計入越飛額度
       }
 
       if (addToLimit) {
-          const cycleKey = getBillingCycle(null, day); 
-          const limitKey = `${cycleKey}-${id}`;
+          let limitKey = '';
+          
+          if (id === 'taishin_cx') {
+              // 台新年度監控邏輯 (YYYY-taishin_cx)
+              limitKey = `${now.getFullYear()}-taishin_cx`;
+          } else {
+              // 一般月結監控邏輯 (YYYY-MM-id)
+              const cycleKey = getBillingCycle(null, day); 
+              limitKey = `${cycleKey}-${id}`;
+          }
+
           if(!db.limits[limitKey]) db.limits[limitKey] = { spend:0, points:0, startDay: day };
           db.limits[limitKey].spend += twdBase; 
           db.limits[limitKey].points += miles;
@@ -993,12 +1036,24 @@
         let prefix = t.id.split('_')[0];
         if(t.id === 'dbs_aov') prefix = 'dbs';
 
-        const day = db.settings.billingDays[prefix] || 1;
-        const cycleKey = getBillingCycle(null, day);
-        const dataKey = `${cycleKey}-${t.id}`;
-        const record = db.limits[dataKey] || { spend:0, points:0 };
-        
-        const current = record.spend; 
+        let current = 0;
+        let cycleDisplay = '';
+
+        if(t.id === 'taishin_cx') {
+            // 台新年度顯示
+            const yearKey = `${now.getFullYear()}-taishin_cx`;
+            const record = db.limits[yearKey] || { spend:0 };
+            current = record.spend;
+            cycleDisplay = `年度累計 (${now.getFullYear()})`;
+        } else {
+            // 一般月結顯示
+            const day = db.settings.billingDays[prefix] || 1;
+            const cycleKey = getBillingCycle(null, day);
+            const dataKey = `${cycleKey}-${t.id}`;
+            const record = db.limits[dataKey] || { spend:0 };
+            current = record.spend;
+            cycleDisplay = `結帳日: 每月${day}號 (本期: ${cycleKey})`;
+        }
         
         const percent = Math.min(100, Math.round((current / t.limit) * 100));
         let color = 'bg-success';
@@ -1008,7 +1063,7 @@
         let subMsg = '';
         if(t.id === 'ctbc_ci') subMsg = '<div class="text-danger small mt-1" style="font-size:0.7em;">(若為生日月，上限減半約 72 萬)</div>';
         if(t.id === 'dbs_aov') subMsg = '<div class="text-danger small mt-1" style="font-size:0.7em;">(LinePay 10% 甜蜜點)</div>';
-        if(t.id === 'taishin_cx') subMsg = '<div class="text-muted small mt-1" style="font-size:0.7em;">(越飛有哩上限20萬哩，只計算$5/哩之消費)</div>';
+        if(t.id === 'taishin_cx') subMsg = '<div class="text-muted small mt-1" style="font-size:0.7em;">(越飛有哩上限20萬哩，只計算$5/哩之消費)<br><span class="text-danger fw-bold">⚠️ 本年度累積，不隨帳單重置</span></div>';
 
         limitHtml += `
           <div class="mb-3">
@@ -1020,7 +1075,7 @@
               <div class="progress-bar ${color}" style="width: ${percent}%; border-radius:4px;"></div>
             </div>
             ${subMsg}
-            <div class="text-end text-muted mt-1" style="font-size:0.7rem; font-family:var(--font-hand);">結帳日: 每月${day}號 (本期: ${cycleKey})</div>
+            <div class="text-end text-muted mt-1" style="font-size:0.7rem; font-family:var(--font-hand);">${cycleDisplay}</div>
           </div>
         `;
       });
