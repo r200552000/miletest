@@ -357,7 +357,7 @@
               <option value="other">🌏 其他</option>
             </select>
             <div class="text-muted text-end mt-1 font-hand" style="font-size:0.7rem; line-height:1.2;">
-                匯率僅供參考 (2026/2/3)<br>精準計算請選「其他」輸入台幣
+                匯率以過往均值計算 (2026/2/3)<br>若要精準金額，選「其他」並手動輸入帳單台幣金額是最準
             </div>
           </div>
           <div class="col-6">
@@ -641,7 +641,8 @@
       const isEUR = curr === 'EUR'; 
       const rate = RATES[curr] || 1; 
       const twdBase = Math.round(amt * rate);
-      const twdSpend = isForeign ? Math.round(twdBase * 1.015) : twdBase;
+      // 核心修正：移除手續費計算 (統一使用本金)
+      const twdSpend = twdBase;
 
       const cat = $('category').value;
       const pay = $('payment').value;
@@ -971,7 +972,7 @@
     function recordResult() {
       if(!window.currentBest) return;
       const { id, name, miles, twdSpend, twdBase, isFlyMore } = window.currentBest;
-      if(!confirm(`確定記帳？\n卡片：${name}\n累積：${miles} 哩`)) return;
+      if(!confirm(`確定記帳？\n卡片：${name}\n累積：${miles} 哩\n(註：金額不含海外交易手續費)`)) return;
 
       const db = loadDB();
       const now = new Date();
